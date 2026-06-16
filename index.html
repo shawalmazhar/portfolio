@@ -1020,17 +1020,30 @@
             }, 200);
         }
 
-        // Dismiss immediately when basic DOM is ready, to make it super fast
-        window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(dismissPreloader, 300); // 300ms minimum show time for smooth UX
+        function checkAndDismiss() {
+            // readyState >= 3 means HAVE_FUTURE_DATA (enough data to start playing)
+            if (video.readyState >= 3) {
+                dismissPreloader();
+            }
+        }
+
+        // Wait for the video to be fully ready to play so hero section isn't blank
+        video.addEventListener('canplay', checkAndDismiss);
+        video.addEventListener('canplaythrough', checkAndDismiss);
+        video.addEventListener('loadeddata', checkAndDismiss);
+        
+        // Also listen for window load as a secondary trigger
+        window.addEventListener('load', () => {
+            checkAndDismiss();
+            // If window is fully loaded but video is still not ready, give it max 2 more seconds
+            setTimeout(dismissPreloader, 2000);
         });
 
-        // Also dismiss on load or video loaded, whichever is first
-        window.addEventListener('load', dismissPreloader);
-        video.addEventListener('loadeddata', dismissPreloader);
+        // Initial check in case it's already cached
+        checkAndDismiss();
         
-        // Very fast fallback (max 1.5 seconds)
-        setTimeout(dismissPreloader, 1500);
+        // Safety fallback just in case events fail or connection is very slow
+        setTimeout(dismissPreloader, 8000);
 
         // ===== SCRUB LOOP =====
         function updateVideoScrub() {
