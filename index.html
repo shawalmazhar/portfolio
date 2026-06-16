@@ -986,30 +986,16 @@
         
         const lerpFactor = isMobile ? 1.0 : 0.12;
 
-        // ===== PRELOADER =====
+        // ===== PRELOADER & BLOB FETCH =====
         const preloader = document.getElementById('preloader');
         const loadProgress = document.getElementById('load-progress');
         const loadPercent = document.getElementById('load-percent');
 
         let preloaderDone = false;
-        let progressVal = 0;
-        
-        // Fast simulated progress
-        const progressInterval = setInterval(() => {
-            if (preloaderDone) {
-                clearInterval(progressInterval);
-                return;
-            }
-            progressVal += Math.random() * 30 + 10; // Fast increments
-            if (progressVal > 90) progressVal = 90; // Wait at 90% for actual load
-            if (loadProgress) loadProgress.style.width = `${progressVal}%`;
-            if (loadPercent) loadPercent.innerText = `${Math.floor(progressVal)}%`;
-        }, 50);
 
         function dismissPreloader() {
             if (preloaderDone) return;
             preloaderDone = true;
-            clearInterval(progressInterval);
             
             if (loadProgress) loadProgress.style.width = `100%`;
             if (loadPercent) loadPercent.innerText = `100%`;
@@ -1017,33 +1003,49 @@
             // Short delay to show 100% before fading out
             setTimeout(() => {
                 if (preloader) preloader.classList.add('fade-out');
-            }, 200);
+            }, 300);
         }
 
-        function checkAndDismiss() {
-            // readyState >= 3 means HAVE_FUTURE_DATA (enough data to start playing)
-            if (video.readyState >= 3) {
-                dismissPreloader();
+        // Fetch video as Blob to ensure smooth scrubbing without getting stuck
+        const req = new XMLHttpRequest();
+        req.open('GET', './images/Cinematic_3D_transition_GOP1.mp4', true);
+        req.responseType = 'blob';
+
+        req.onload = function() {
+            if (this.status === 200) {
+                const videoBlob = this.response;
+                const videoUrl = URL.createObjectURL(videoBlob);
+                video.src = videoUrl;
+                
+                video.oncanplaythrough = () => {
+                    dismissPreloader();
+                };
+                
+                // Fallback if canplaythrough doesn't fire fast enough after blob is loaded
+                setTimeout(dismissPreloader, 1000);
+            } else {
+                dismissPreloader(); // Fallback on error
             }
-        }
+        };
 
-        // Wait for the video to be fully ready to play so hero section isn't blank
-        video.addEventListener('canplay', checkAndDismiss);
-        video.addEventListener('canplaythrough', checkAndDismiss);
-        video.addEventListener('loadeddata', checkAndDismiss);
-        
-        // Also listen for window load as a secondary trigger
-        window.addEventListener('load', () => {
-            checkAndDismiss();
-            // If window is fully loaded but video is still not ready, give it max 2 more seconds
-            setTimeout(dismissPreloader, 2000);
-        });
+        req.onprogress = function(e) {
+            if (e.lengthComputable && !preloaderDone) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                // Cap at 95% until canplaythrough fires
+                const displayPercent = Math.min(percentComplete, 95);
+                if (loadProgress) loadProgress.style.width = `${displayPercent}%`;
+                if (loadPercent) loadPercent.innerText = `${Math.floor(displayPercent)}%`;
+            }
+        };
 
-        // Initial check in case it's already cached
-        checkAndDismiss();
+        req.onerror = function() {
+            dismissPreloader(); // Fallback on error
+        };
+
+        req.send();
         
-        // Safety fallback just in case events fail or connection is very slow
-        setTimeout(dismissPreloader, 8000);
+        // Safety fallback just in case network hangs
+        setTimeout(dismissPreloader, 15000);
 
         // ===== SCRUB LOOP =====
         function updateVideoScrub() {
