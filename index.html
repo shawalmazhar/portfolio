@@ -992,20 +992,45 @@
         const loadPercent = document.getElementById('load-percent');
 
         let preloaderDone = false;
+        let progressVal = 0;
+        
+        // Fast simulated progress
+        const progressInterval = setInterval(() => {
+            if (preloaderDone) {
+                clearInterval(progressInterval);
+                return;
+            }
+            progressVal += Math.random() * 30 + 10; // Fast increments
+            if (progressVal > 90) progressVal = 90; // Wait at 90% for actual load
+            if (loadProgress) loadProgress.style.width = `${progressVal}%`;
+            if (loadPercent) loadPercent.innerText = `${Math.floor(progressVal)}%`;
+        }, 50);
+
         function dismissPreloader() {
             if (preloaderDone) return;
             preloaderDone = true;
-            if (preloader) preloader.classList.add('fade-out');
-        }
-
-        video.addEventListener('loadeddata', () => {
+            clearInterval(progressInterval);
+            
             if (loadProgress) loadProgress.style.width = `100%`;
             if (loadPercent) loadPercent.innerText = `100%`;
-            dismissPreloader();
+            
+            // Short delay to show 100% before fading out
+            setTimeout(() => {
+                if (preloader) preloader.classList.add('fade-out');
+            }, 200);
+        }
+
+        // Dismiss immediately when basic DOM is ready, to make it super fast
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(dismissPreloader, 300); // 300ms minimum show time for smooth UX
         });
+
+        // Also dismiss on load or video loaded, whichever is first
+        window.addEventListener('load', dismissPreloader);
+        video.addEventListener('loadeddata', dismissPreloader);
         
-        // Fallback in case video takes too long
-        setTimeout(dismissPreloader, 3000);
+        // Very fast fallback (max 1.5 seconds)
+        setTimeout(dismissPreloader, 1500);
 
         // ===== SCRUB LOOP =====
         function updateVideoScrub() {
