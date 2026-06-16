@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Developer Portfolio</title>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap');
+
+        html { overflow-y: scroll; background-color: var(--bg-color); } :root {
+            --bg-color: #050505;
+            --text-color: #f0f0f0;
+            --accent-blue: #00f3ff;
+            --accent-purple: #9d00ff;
+            --glass-bg: rgba(10, 10, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Fixed still image background */
+        #bg-image {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            z-index: -1;
+            pointer-events: none;
+            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.75)), url('./images/bg-gradient.webp') center center / cover no-repeat;
+        }
+
+        select {
+            background: #111 !important;
+            border: none;
+            border-bottom: 2px solid #333;
+            padding: 12px;
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
+            appearance: none;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        select option {
+            background: #111;
+            color: var(--text-color);
+            padding: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            section {
+                padding: 4rem 5% !important;
+            }
+
+            .glass-panel {
+                padding: 2rem !important;
+            }
+        }
+
+        body {
+            background-color: transparent;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: transparent !important;
+            border: none !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            transition: padding 0.4s ease;
+        }
+
+        header.scrolled {
+            padding: 15px 10%;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        nav a { color: #aaa;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent-blue);
+            text-shadow: 0 0 10px var(--accent-blue);
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #888;
+        }
+
+        .highlight {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+
+        .content { max-width: 600px; }
+        .right { margin-left: auto; text-align: right; }
+
+        .right ul {
+            list-style: none;
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #e0e0e0;
+        }
+
+        .right li {
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .right li:hover {
+            color: var(--accent-blue);
+            text-shadow: 0 0 10px var(--accent-blue);
+            transform: translateX(-10px);
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(157, 0, 255, 0.2);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+        }
+
+        .tech-stack {
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--accent-blue);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--accent-blue);
+            text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+        }
+
+        .terminal {
+            font-family: 'Fira Code', monospace;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .terminal-header { background: #000 !important; position: fixed; top: 0; left: 0; width: 100%; padding: 20px 10%; z-index: 1000; 
+            background: #1a1a1a;
+            padding: 10px 20px;
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid #333;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27c93f; }
+
+        .terminal-body { padding: 2rem; }
+
+        .prompt {
+            color: #27c93f;
+            margin-right: 10px;
+        }
+
+        #contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        #contact-form input,
+        #contact-form textarea {
+            background: rgba(0, 0, 0, 0.3);
+            border: none;
+            border-bottom: 2px solid #333;
+            padding: 10px;
+            color: var(--text-color);
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        #contact-form input:focus,
+        #contact-form textarea:focus {
+            outline: none;
+            border-bottom-color: var(--accent-purple);
+            background: rgba(157, 0, 255, 0.05);
+        }
+
+        #contact-form button {
+            background: transparent;
+            border: 2px solid var(--accent-purple);
+            color: var(--accent-purple);
+            padding: 10px 20px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1.2rem;
+            cursor: pointer;
+            align-self: flex-start;
+            transition: all 0.3s ease;
+        }
+
+        #contact-form button:hover {
+            background: var(--accent-purple);
+            color: #fff;
+            box-shadow: 0 0 15px var(--accent-purple);
+        }
+
+        .scroll-indicator {
+            margin-top: 4rem;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            opacity: 0.7;
+            animation: bounce 2s infinite;
+        }
+
+        .scroll-indicator p {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .arrow {
+            width: 2px;
+            height: 40px;
+            background: linear-gradient(transparent, var(--accent-blue));
+            position: relative;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        footer a:hover {
+            color: var(--accent-blue) !important;
+            text-shadow: 0 0 10px var(--accent-blue);
+        }
+
+        .social-icon:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 0 20px var(--accent-blue);
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 6px;
+            z-index: 110;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 30px;
+            height: 2px;
+            background: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        /* Hamburger Animation */
+        .hamburger.toggle span:nth-child(1) { transform: rotate(-45deg) translate(-5px, 6px); }
+        .hamburger.toggle span:nth-child(2) { opacity: 0; }
+        .hamburger.hamburger.toggle span:nth-child(3) { transform: rotate(45deg) translate(-5px, -6px); }
+
+        @media (max-width: 992px) {
+            header { background: #000 !important; position: fixed; top: 0; left: 0; width: 100%; padding: 20px 10%; z-index: 1000;  padding: 15px 5%; }
+            .hamburger { display: flex; }
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                height: 100vh;
+                height: 100dvh;
+                background: rgba(5, 5, 5, 0.95);
+                backdrop-filter: blur(10px);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: right 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
+                border-left: 1px solid var(--glass-border);
+                z-index: 105;
+            }
+            nav.active { right: 0; }
+            nav ul { flex-direction: column; gap: 2.5rem; text-align: center; }
+            nav a { color: #aaa;  font-size: 1.8rem; }
+            h1 { font-size: 3.5rem; }
+            h2 { font-size: 3rem; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.8rem; }
+            h2 { font-size: 2.2rem; }
+            section { padding: 0 5%; min-height: auto; padding-top: 150px; padding-bottom: 50px; }
+            .right { text-align: left; }
+            .glass-panel { padding: 2rem; }
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body.light-mode {
+            --bg-color: #f0f0f0;
+            --text-color: #111111;
+            --accent-blue: #0066cc;
+            --accent-purple: #6600cc;
+            --glass-bg: rgba(255, 255, 255, 0.7);
+            --glass-border: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-mode header { background: #000 !important; position: fixed; top: 0; left: 0; width: 100%; padding: 20px 10%; z-index: 1000; 
+            background: rgba(240, 240, 240, 0.7);
+        }
+
+        body.light-mode .content p {
+            color: #444;
+        }
+
+        body.light-mode .right ul {
+            color: #222;
+        }
+
+        body.light-mode canvas#bg {
+            filter: invert(0.85) hue-rotate(180deg) brightness(1.3) contrast(1.2);
+            opacity: 1;
+        }
+    .social-icon:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0, 243, 255, 0.4); background: rgba(0,243,255,0.1) !important; } 
+        .theme-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid var(--glass-border);
+            color: var(--text-color);
+            padding: 5px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+        .theme-btn:hover {
+            background: rgba(0, 243, 255, 0.2);
+            border-color: var(--accent-blue);
+        }
+        body.light-mode .theme-btn {
+            color: #111;
+            border-color: #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            body { font-size: 0.9rem; }
+            h1 { font-size: 2.2rem !important; }
+            h2 { font-size: 1.8rem !important; }
+            p { font-size: 0.95rem !important; }
+        }
+</style>
+    
+    <!-- GSAP for scroll animations -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+    <div id="bg-image"></div>
+    
+    
+
+    <header>
+        <a href="index.html?v=2" class="logo">SM<span class="highlight">.</span></a>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <nav id="navbar">
+            <ul>
+                <li><a href="index.html?v=2">Home</a></li>
+                <li><a href="services.html?v=2">Services</a></li>
+                <li><a href="about.html?v=2">About</a></li>
+                <li><a href="contact.html?v=2" class="active">Contact</a></li>
+                <li><a href="index.html?v=2#reviews">Reviews</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section id="contact-hero" class="hero" style="min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center; text-align: center;">
+            <div class="glass-panel terminal" style="max-width: 700px; padding: 2rem;">
+                <div class="terminal-header">
+                    <span class="dot red"></span>
+                    <span class="dot yellow"></span>
+                    <span class="dot green"></span>
+                </div>
+                <div class="terminal-body" style="text-align: left;">
+                    <p><span class="prompt">guest@portfolio:~$</span> contact --init</p>
+                    <h2 class="highlight" style="margin: 1rem 0;">Start a Project</h2>
+                     <form id="contact-form">
+                        <div class="form-row">
+                            <input type="text" id="form-name" placeholder="Full Name" required>
+                            <input type="email" id="form-email" placeholder="Email Address" required>
+                        </div>
+                        <div class="form-row" style="margin-top: 1rem;">
+                            <select id="form-type" required>
+                                <option value="" disabled selected>Project Type</option>
+                                <option value="3D Website">3D Website</option>
+                                <option value="Mobile App">Mobile App</option>
+                                <option value="Full-Stack Solution">Full-Stack Solution</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <select id="form-budget" required>
+                                <option value="" disabled selected>Budget Range</option>
+                                <option value="1k-5k">$1k - $5k</option>
+                                <option value="5k-10k">$5k - $10k</option>
+                                <option value="10k+">$10k+</option>
+                            </select>
+                        </div>
+                        <textarea id="form-message" placeholder="Tell me about your vision..." rows="4" style="margin-top: 1rem; width: 100%;" required></textarea>
+                        <button type="submit" id="submit-btn" style="margin-top: 2rem; width: 100%;">Execute Send();</button>
+                        <div id="form-status" style="margin-top: 1rem; text-align: center; font-family: 'Fira Code', monospace; color: var(--accent-blue); font-size: 0.9rem; height: 1.2rem;"></div>
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <a href="mailto:chshawal0069@gmail.com" style="color: #666; text-decoration: none; font-size: 0.75rem; transition: color 0.3s ease;" onmouseover="this.style.color='var(--accent-blue)'" onmouseout="this.style.color='#666'">Contact me on Gmail</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="direct-contact" style="min-height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center;">
+            <div class="glass-panel" style="max-width: 900px;">
+                <h2 class="highlight">Global Connectivity</h2>
+                <p style="font-size: 1.2rem; margin-bottom: 3rem;">Whether you prefer a quick email or a professional connection on LinkedIn, I'm always available to discuss new opportunities.</p>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h4 style="color: var(--accent-blue);">Direct Email</h4>
+                        <p style="margin-top: 10px;"><a href="mailto:chshawal0069@gmail.com" style="color: var(--text-color); text-decoration: none;">chshawal0069@gmail.com</a></p>
+                    </div>
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h4 style="color: var(--accent-purple);">Professional</h4>
+                        <p style="margin-top: 10px;"><a href="https://pk.linkedin.com/in/shawal-mazhar-53a79430a" target="_blank" style="color: var(--text-color); text-decoration: none;">LinkedIn Profile</a></p>
+                    </div>
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h4 style="color: var(--accent-blue);">Open Source</h4>
+                        <p style="margin-top: 10px;"><a href="https://github.com/shawalmazhar" target="_blank" style="color: var(--text-color); text-decoration: none;">GitHub Repos</a></p>
+                    </div>
+                </div>
+
+                <div style="margin-top: 4rem; padding: 2rem; background: rgba(0, 243, 255, 0.05); border-radius: 15px;">
+                    <h3 style="color: var(--accent-blue);">Current Availability</h3>
+                    <p style="margin-top: 10px; font-weight: bold;">[ ACTIVE ] Accepting New Projects for Q2 2026</p>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer style="padding: 5rem 10% 2rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 5rem; background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; position: relative; z-index: 10;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4rem; margin-bottom: 4rem;">
+            <div>
+                <a href="index.html?v=2" class="logo" style="display: block; margin-bottom: 1.5rem;">SM<span class="highlight">.</span></a>
+                <p style="font-size: 1rem; color: #888; line-height: 1.6;">Crafting high-performance digital experiences. Specializing in 3D Web architecture and premium mobile application development.</p>
+            </div>
+            <div>
+                <h4 style="color: var(--text-color); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">Quick Navigation</h4>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px;">
+                    <li><a href="index.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">Home</a></li>
+                    <li><a href="services.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">Services</a></li>
+                    <li><a href="about.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">About</a></li>
+                    <li><a href="contact.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: var(--text-color); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">Connect</h4>
+                <p style="color: #888; margin-bottom: 1.5rem;">Email: <a href="mailto:chshawal0069@gmail.com" style="color: var(--accent-blue); text-decoration: none;">chshawal0069@gmail.com</a></p>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="https://pk.linkedin.com/in/shawal-mazhar-53a79430a" target="_blank" class="social-icon" style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.03); border: 1px solid var(--accent-purple); display: flex; align-items: center; justify-content: center; color: var(--accent-purple); transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    </a>
+                    <a href="https://github.com/shawalmazhar" target="_blank" class="social-icon" style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.03); border: 1px solid var(--accent-blue); display: flex; align-items: center; justify-content: center; color: var(--accent-blue); transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" width="22" height="22" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; text-align: center; color: #444; font-size: 0.9rem;">
+            <p>&copy; 2026 Shawal Mazhar. All rights reserved. | <span class="highlight">Architecting Digital Realities</span></p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Form Submission Logic ---
+        const contactForm = document.getElementById('contact-form');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('form-name').value;
+            const email = document.getElementById('form-email').value;
+            const type = document.getElementById('form-type').value;
+            const budget = document.getElementById('form-budget').value;
+            const message = document.getElementById('form-message').value;
+
+            const subject = encodeURIComponent(`New Project Inquiry from ${name}`);
+            const body = encodeURIComponent(
+                `Hello Shawal,\n\n` +
+                `You have a new inquiry through your portfolio website.\n\n` +
+                `Details:\n` +
+                `- Name: ${name}\n` +
+                `- Email: ${email}\n` +
+                `- Project Type: ${type}\n` +
+                `- Budget Range: ${budget}\n\n` +
+                `Message:\n${message}\n\n` +
+                `Regards,\n${name}`
+            );
+
+            window.location.href = `mailto:chshawal0069@gmail.com?subject=${subject}&body=${body}`;
+
+            contactForm.reset();
+            const status = document.getElementById('form-status');
+            status.innerText = "> System: Message Sent Successfully!";
+            
+            setTimeout(() => {
+                status.innerText = "";
+            }, 3000);
+        });
+
+        // --- Hamburger Menu Logic ---
+        const hamburger = document.getElementById('hamburger');
+        const nav = document.getElementById('navbar');
+        const navLinks = document.querySelectorAll('nav a');
+        hamburger.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            hamburger.classList.toggle('toggle');
+        });
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                nav.classList.remove('active');
+                hamburger.classList.remove('toggle');
+            });
+        });
+
+        // Header scroll
+        window.addEventListener('scroll', () => {
+            document.querySelector('header').classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // GSAP animations
+        gsap.registerPlugin(ScrollTrigger);
+        gsap.utils.toArray('.glass-panel').forEach(panel => {
+            gsap.from(panel, {
+                y: 40, opacity: 0, duration: 0.8,
+                scrollTrigger: { trigger: panel, start: 'top 85%', toggleActions: 'play none none none' }
+            });
+        });
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+

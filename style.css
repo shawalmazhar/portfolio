@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap');
+
+:root {
+    --bg-color: #050505;
+    --text-color: #f0f0f0;
+    --accent-blue: #00f3ff;
+    --accent-purple: #9d00ff;
+    --glass-bg: rgba(10, 10, 15, 0.6);
+    --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    overflow-x: hidden;
+}
+
+canvas#bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: -1;
+    pointer-events: none; /* Let clicks pass through if needed, but we'll manage raycasting in JS */
+}
+
+main {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+}
+
+section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 10%;
+    position: relative;
+}
+
+h1 {
+    font-size: 5rem;
+    font-weight: 800;
+    letter-spacing: -2px;
+    margin-bottom: 1rem;
+    line-height: 1.1;
+}
+
+h2 {
+    font-size: 3.5rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+    color: var(--text-color);
+}
+
+p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: #a0a0a0;
+}
+
+.highlight {
+    background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+}
+
+.content {
+    max-width: 600px;
+}
+
+.right {
+    margin-left: auto;
+    text-align: right;
+}
+
+.right ul {
+    list-style: none;
+    font-size: 1.5rem;
+    font-weight: 300;
+    color: #e0e0e0;
+}
+
+.right li {
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+.right li:hover {
+    color: var(--accent-blue);
+    text-shadow: 0 0 10px var(--accent-blue);
+    transform: translateX(-10px);
+}
+
+/* Glassmorphism Panels */
+.glass-panel {
+    background: var(--glass-bg);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.glass-panel:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 40px 0 rgba(157, 0, 255, 0.2);
+    border: 1px solid rgba(157, 0, 255, 0.3);
+}
+
+.tech-stack {
+    margin-top: 2rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.tag {
+    padding: 0.5rem 1rem;
+    background: rgba(0, 243, 255, 0.1);
+    border: 1px solid var(--accent-blue);
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--accent-blue);
+    text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* Terminal Contact Form */
+.terminal {
+    font-family: 'Fira Code', monospace;
+    padding: 0;
+    overflow: hidden;
+}
+
+.terminal-header {
+    background: #1a1a1a;
+    padding: 10px 20px;
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+.dot.red { background: #ff5f56; }
+.dot.yellow { background: #ffbd2e; }
+.dot.green { background: #27c93f; }
+
+.terminal-body {
+    padding: 2rem;
+}
+
+.prompt {
+    color: var(--accent-green, #27c93f);
+    margin-right: 10px;
+}
+
+#contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+#contact-form input,
+#contact-form textarea {
+    background: rgba(0, 0, 0, 0.3);
+    border: none;
+    border-bottom: 2px solid #333;
+    padding: 10px;
+    color: var(--text-color);
+    font-family: 'Fira Code', monospace;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+#contact-form input:focus,
+#contact-form textarea:focus {
+    outline: none;
+    border-bottom-color: var(--accent-purple);
+    background: rgba(157, 0, 255, 0.05);
+}
+
+#contact-form button {
+    background: transparent;
+    border: 2px solid var(--accent-purple);
+    color: var(--accent-purple);
+    padding: 10px 20px;
+    font-family: 'Fira Code', monospace;
+    font-size: 1.2rem;
+    cursor: pointer;
+    align-self: flex-start;
+    transition: all 0.3s ease;
+}
+
+#contact-form button:hover {
+    background: var(--accent-purple);
+    color: #fff;
+    box-shadow: 0 0 15px var(--accent-purple);
+}
+
+/* Scroll Indicator */
+.scroll-indicator {
+    margin-top: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    opacity: 0.7;
+    animation: bounce 2s infinite;
+}
+
+.scroll-indicator p {
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+}
+
+.arrow {
+    width: 2px;
+    height: 40px;
+    background: linear-gradient(transparent, var(--accent-blue));
+    position: relative;
+}
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+}
+
+@media (max-width: 768px) {
+    h1 { font-size: 3rem; }
+    h2 { font-size: 2.5rem; }
+    section { padding: 0 5%; }
+    .right { text-align: left; }
+}

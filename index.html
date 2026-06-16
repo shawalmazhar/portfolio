@@ -1,0 +1,1047 @@
+<!DOCTYPE html>  
+<html lang="en" style="scroll-behavior: smooth;">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Developer Portfolio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="preload" href="./images/Cinematic_3D_transition_GOP1.mp4" as="video" type="video/mp4">
+    
+    <style>
+
+        html { overflow-y: scroll; scroll-behavior: smooth; background-color: var(--bg-color); } :root {
+            --bg-color: #050505;
+            --text-color: #f0f0f0;
+            --accent-blue: #00f3ff;
+            --accent-purple: #9d00ff;
+            --glass-bg: rgba(10, 10, 15, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: transparent;
+            color: var(--text-color);
+            overflow-x: clip; /* Fix for sticky position */
+        }
+
+        #video-bg, #video-bg-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            z-index: -2;
+            pointer-events: none;
+            background-color: #050505;
+            transform: translate3d(0, 0, 0);
+            will-change: transform;
+            backface-visibility: hidden;
+            object-fit: cover;
+        }
+
+        .video-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: linear-gradient(to bottom, rgba(5, 5, 5, 0.45) 0%, rgba(5, 5, 5, 0.85) 100%);
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 30px;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            border: none;
+            border-radius: 50px;
+            color: #fff;
+            font-size: 1rem;
+            font-weight: 700;
+            text-decoration: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-top: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+            pointer-events: all;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 0 30px rgba(157, 0, 255, 0.5);
+        }
+
+        /* Scroll-driven text blocks */
+        .scroll-text-block {
+            position: fixed;
+            top: 50%;
+            z-index: 5;
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            max-width: 500px;
+            width: 90%;
+        }
+        .scroll-text-left {
+            left: 10%;
+            text-align: left;
+            transform: translateY(-50%) translateX(-60px);
+        }
+        .scroll-text-right {
+            right: 10%;
+            text-align: right;
+            transform: translateY(-50%) translateX(60px);
+        }
+        .scroll-text-block.visible {
+            opacity: 1;
+            transform: translateY(-50%) translateX(0);
+        }
+
+        @media (max-width: 768px) {
+            .scroll-text-block {
+                left: 50% !important;
+                right: auto !important;
+                text-align: center !important;
+                transform: translate(-50%, -40%) scale(0.9);
+                max-width: 350px;
+            }
+            .scroll-text-block.visible {
+                transform: translate(-50%, -50%) scale(1);
+            }
+            h1 { font-size: 2.5rem !important; }
+            .hero-badge { font-size: 0.7rem; padding: 6px 15px; }
+            .btn-primary { padding: 10px 25px; font-size: 0.9rem; }
+        }
+        .scroll-text-block h2 {
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        .scroll-text-block p {
+            font-size: 1.1rem;
+            color: rgba(226, 232, 240, 0.7);
+            line-height: 1.6;
+        }
+
+        #hero-scroll-section {
+            position: relative;
+            height: 600vh;
+            display: block; /* Ensure it's not flexed by parent */
+            margin: 0;
+            padding: 0;
+        }
+
+        #hero-sticky {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        #hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 24px;
+            pointer-events: all;
+            width: 100%;
+            transition: opacity .6s, transform .6s;
+        }
+
+        #hero-content.hidden {
+            opacity: 0;
+            transform: translateY(-20px);
+            pointer-events: none;
+        }
+
+        /* Progress bar at top */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            z-index: 9999;
+            transition: width .05s linear;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 20px;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--accent-blue);
+            border-radius: 50px;
+            font-size: .85rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+            margin-bottom: 22px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .scroll-hint {
+            position: fixed;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 3;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            opacity: 1;
+            transition: opacity .4s;
+        }
+        .scroll-hint.hidden { opacity: 0; pointer-events: none; }
+
+        .scroll-mouse {
+            width: 26px; height: 42px;
+            border: 2px solid rgba(255,255,255,.2);
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            padding-top: 8px;
+        }
+        .scroll-dot {
+            width: 4px; height: 8px;
+            background: var(--accent-blue);
+            border-radius: 4px;
+            animation: scrollAnim 2s ease-in-out infinite;
+        }
+        @keyframes scrollAnim {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(15px); opacity: 0; }
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 25px 10%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: transparent;
+            border: none;
+            backdrop-filter: none;
+            transition: padding 0.4s ease;
+        }
+
+        header.scrolled {
+            padding: 15px 10%;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-color);
+            text-decoration: none;
+            letter-spacing: 1px;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        nav a { color: #aaa;
+            text-decoration: none;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent-blue);
+            text-shadow: 0 0 10px var(--accent-blue);
+        }
+
+        main {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+        }
+
+        section {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 10%;
+            position: relative;
+        }
+
+        h1 {
+            font-size: 5rem;
+            font-weight: 800;
+            letter-spacing: -2px;
+            margin-bottom: 1rem;
+            line-height: 1.1;
+        }
+
+        h2 {
+            font-size: 3.5rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+        }
+
+        p {
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #888;
+        }
+
+        .highlight {
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+        }
+
+        .content { max-width: 600px; }
+        .right { margin-left: auto; text-align: right; }
+
+        .right ul {
+            list-style: none;
+            font-size: 1.5rem;
+            font-weight: 300;
+            color: #e0e0e0;
+        }
+
+        .right li {
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .right li:hover {
+            color: var(--accent-blue);
+            text-shadow: 0 0 10px var(--accent-blue);
+            transform: translateX(-10px);
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 3rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            max-width: 500px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .glass-panel:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px 0 rgba(157, 0, 255, 0.2);
+            border: 1px solid rgba(157, 0, 255, 0.3);
+        }
+
+        .tag {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 243, 255, 0.1);
+            border: 1px solid var(--accent-blue);
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--accent-blue);
+            text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+            white-space: nowrap;
+            display: inline-block;
+        }
+
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            cursor: pointer;
+            gap: 6px;
+            z-index: 1100;
+        }
+
+        .hamburger span {
+            display: block;
+            width: 30px;
+            height: 2px;
+            background: var(--text-color);
+            transition: all 0.3s ease;
+        }
+
+        .hamburger.toggle span:nth-child(1) { transform: rotate(-45deg) translate(-5px, 6px); }
+        .hamburger.toggle span:nth-child(2) { opacity: 0; }
+        .hamburger.toggle span:nth-child(3) { transform: rotate(45deg) translate(-5px, -6px); }
+
+        @media (max-width: 992px) {
+            .hamburger { display: flex; }
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                height: 100vh;
+                height: 100dvh;
+                background: rgba(5, 5, 5, 0.95);
+                backdrop-filter: blur(10px);
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                transition: right 0.5s cubic-bezier(0.77,0.2,0.05,1.0);
+                border-left: 1px solid var(--glass-border);
+                z-index: 1050;
+            }
+            nav.active { right: 0; }
+            nav ul { flex-direction: column; gap: 2.5rem; text-align: center; }
+            nav a { font-size: 1.8rem; }
+            h1 { font-size: 3.5rem; }
+            h2 { font-size: 3rem; }
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 2.2rem; }
+            h2 { font-size: 2rem; }
+            section { padding: 0 5%; }
+            .glass-panel { padding: 1.5rem; max-width: 100%; }
+            footer { padding: 3rem 5% 2rem !important; }
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.8rem; }
+            h2 { font-size: 1.6rem; }
+            .hero-badge { font-size: 0.65rem; padding: 5px 12px; }
+        }
+
+        /* Image showcase */
+        .image-showcase {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 2rem;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+        .image-showcase img {
+            width: 100%;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .image-showcase img:hover {
+            transform: scale(1.03);
+            box-shadow: 0 12px 50px rgba(0,243,255,0.2);
+        }
+        @media (max-width: 768px) {
+            .image-showcase { grid-template-columns: 1fr; gap: 1.5rem; }
+        }
+
+        /* Custom section paddings for mobile responsiveness */
+        .about-me-section {
+            padding: 80px 10%;
+        }
+        .faq-section, .reviews {
+            padding: 0 10%;
+        }
+        @media (max-width: 768px) {
+            .about-me-section {
+                padding: 40px 5%;
+            }
+            .faq-section, .reviews {
+                padding: 40px 5%;
+            }
+        }
+
+        /* Futuristic Preloader Styles */
+        #preloader {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            background: #030303;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), visibility 0.8s;
+        }
+        #preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .preloader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .cyber-ring {
+            width: 80px; height: 80px;
+            border: 2px solid rgba(0, 243, 255, 0.1);
+            border-top: 2px solid var(--accent-blue);
+            border-bottom: 2px solid var(--accent-purple);
+            border-radius: 50%;
+            animation: spin 1.5s cubic-bezier(0.53, 0.21, 0.29, 0.87) infinite;
+            filter: drop-shadow(0 0 10px var(--accent-blue));
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading-text {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            letter-spacing: 4px;
+            color: #888;
+            font-weight: 500;
+        }
+        .loading-bar {
+            width: 200px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        .loading-progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
+            box-shadow: 0 0 10px var(--accent-blue);
+            transition: width 0.1s ease-out;
+        }
+        .loading-percentage {
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            color: var(--accent-blue);
+            text-shadow: 0 0 5px rgba(0, 243, 255, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            /* Scale text down on mobile */
+            body {
+                font-size: 0.9rem;
+            }
+            h1 {
+                font-size: 2.2rem !important;
+            }
+            h2 {
+                font-size: 1.8rem !important;
+            }
+            p {
+                font-size: 0.95rem !important;
+            }
+        }
+    </style>
+    
+    <!-- GSAP & Three.js removed — not used on this page -->
+</head>
+<body>
+    <!-- Futuristic Preloader -->
+    <div id="preloader">
+        <div class="preloader-content">
+            <div class="cyber-ring"></div>
+            <div class="loading-text">
+                <span class="highlight">ARCHITECTING</span> REALITY
+            </div>
+            <div class="loading-bar">
+                <div class="loading-progress" id="load-progress"></div>
+            </div>
+            <div class="loading-percentage" id="load-percent">0%</div>
+        </div>
+    </div>
+    
+    <script>
+        if (window.location.hash === '#reviews' || window.location.href.includes('#reviews')) {
+            const preloader = document.getElementById('preloader');
+            if (preloader) {
+                preloader.style.setProperty('display', 'none', 'important');
+            }
+        }
+    </script>
+    
+    <video id="video-bg" preload="auto" muted playsinline>
+        <source src="./images/Cinematic_3D_transition_GOP1.mp4" type="video/mp4">
+    </video>
+    <div class="video-overlay"></div>
+
+    <header>
+        <a href="index.html?v=2" class="logo">SM<span class="highlight">.</span></a>
+        <div class="hamburger" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <nav id="navbar">
+            <ul>
+                <li><a href="index.html?v=2" class="active">Home</a></li>
+                <li><a href="services.html?v=2">Services</a></li>
+                <li><a href="about.html?v=2">About</a></li>
+                <li><a href="contact.html?v=2">Contact</a></li>
+                <li><a href="index.html?v=2#reviews">Reviews</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ═══════════════════════════════════
+             HERO — Scroll-Driven Frame Animation
+        ═══════════════════════════════════ -->
+        <section id="hero-scroll-section">
+            <div id="hero-sticky">
+                <div id="hero-content">
+                    <div class="hero-badge">
+                        <span class="badge-dot"></span>
+                        Software Engineer & Architect
+                    </div>
+                    <h1>Hi, I'm <span class="highlight">Shawal Mazhar</span></h1>
+                    <p style="font-size: 1.2rem; line-height: 1.8; margin-top: 15px; letter-spacing: 1px; max-width: 850px; margin-left: auto; margin-right: auto;">
+                        I specialize in building <strong>High-Performance Web & Mobile Applications</strong> with immersive <strong>3D Visuals</strong>. 
+                        Architecting the future of digital experiences with precision and creativity.
+                    </p>
+                    <div style="margin-top: 40px; display: flex; justify-content: center; gap: 20px;">
+                        <a href="#projects" class="btn-primary">Explore My Work</a>
+                    </div>
+                </div>
+
+                <!-- New Scroll-Driven Text Blocks -->
+                <div id="text-block-1" class="scroll-text-block scroll-text-left">
+                    <h2>Precision <br><span class="highlight">Engineering</span></h2>
+                    <p>Every line of code is optimized for performance, scalability, and seamless user experiences across all devices.</p>
+                </div>
+
+                <div id="text-block-2" class="scroll-text-block scroll-text-right">
+                    <h2>Immersive <br><span class="highlight">Visuals</span></h2>
+                    <p>Pushing the boundaries of the web with advanced 3D interactions and cinematic motion design that captivates.</p>
+                </div>
+
+                <div id="text-block-3" class="scroll-text-block scroll-text-left">
+                    <h2>Mobile <br><span class="highlight">Excellence</span></h2>
+                    <p>Architecting robust iOS and Android applications with native-level performance and elegant fluid interfaces.</p>
+                </div>
+            </div>
+
+            <div class="scroll-hint">
+                <div class="scroll-mouse"><div class="scroll-dot"></div></div>
+                <p style="font-size: 0.7rem; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.4);">Scroll to explore</p>
+            </div>
+        </section>
+
+
+        <section id="tech-orbit" style="min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
+            <div class="content" style="max-width: 1000px;">
+                <h2 class="highlight">My Tech Stack</h2>
+                <p style="margin-bottom: 3rem;">A fusion of modern web technologies and cross-platform mobile development tools.</p>
+                <div style="display: flex; gap: 1.5rem; flex-wrap: wrap; justify-content: center;">
+                    <div class="glass-panel" style="padding: 1.5rem; min-width: 200px;">
+                        <h4 style="color: var(--accent-blue);">Web Core</h4>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">HTML5 • CSS3 • JavaScript (ES6+)</p>
+                    </div>
+                    <div class="glass-panel" style="padding: 1.5rem; min-width: 200px;">
+                        <h4 style="color: var(--accent-purple);">Frameworks</h4>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">React • Next.js • TailwindCSS</p>
+                    </div>
+                    <div class="glass-panel" style="padding: 1.5rem; min-width: 200px;">
+                        <h4 style="color: var(--accent-blue);">Mobile</h4>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">React Native • Flutter • App Store Ops</p>
+                    </div>
+                    <div class="glass-panel" style="padding: 1.5rem; min-width: 200px;">
+                        <h4 style="color: var(--accent-purple);">Immersive</h4>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">Three.js • WebGL • GSAP 3D</p>
+                    </div>
+                    <div class="glass-panel" style="padding: 1.5rem; min-width: 200px;">
+                        <h4 style="color: var(--accent-blue);">Backend</h4>
+                        <p style="font-size: 0.9rem; margin-top: 10px;">Node.js • Firebase • PostgreSQL</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="process" class="process">
+            <div class="content right">
+                <h2>My Process</h2>
+                <ul>
+                    <li>1. Discovery & Strategy</li>
+                    <li>2. UI/UX Design</li>
+                    <li>3. 3D Modeling & Integration</li>
+                    <li>4. Full-stack Development</li>
+                </ul>
+            </div>
+        </section>
+        <style>
+            .project-card:hover .project-img-wrapper img {
+                transform: scale(1.08) !important;
+            }
+            .project-card:hover {
+                transform: translateY(-10px) !important;
+                box-shadow: 0 15px 45px 0 rgba(0, 243, 255, 0.2) !important;
+            }
+        </style>
+        <section id="projects" class="projects">
+            <div class="content" style="width: 100%; max-width: 1200px;">
+                <h2 style="margin-bottom: 3rem;">Featured Projects</h2>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 3rem;">
+                    
+                    <!-- Aeterna -->
+                    <div class="glass-panel project-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                        <div class="project-img-wrapper" style="width: 100%; height: 240px; overflow: hidden;">
+                            <img src="./images/aeterna.png" alt="Aeterna" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                        </div>
+                        <div style="padding: 2.5rem; display: flex; flex-direction: column; flex-grow: 1;">
+                            <h3 style="color: var(--accent-blue); font-size: 1.8rem;">Aeterna</h3>
+                            <p style="margin-top: 1rem; flex-grow: 1; font-size: 1.05rem; line-height: 1.6;">A sleek, immersive 3D interactive portfolio designed with abstract geometric precision and neon accents to deliver a premium user experience.</p>
+                            <div class="tech-stack" style="margin-top: 1.5rem; margin-bottom: 2rem;">
+                                <span class="tag">WebGL</span>
+                                <span class="tag">Three.js</span>
+                                <span class="tag">React</span>
+                            </div>
+                            <a href="https://shawalmazhar.github.io/aeterna/" target="_blank" class="btn-primary" style="margin-top: auto; justify-content: center; width: 100%;">Explore Project</a>
+                        </div>
+                    </div>
+
+                    <!-- Elite Estate -->
+                    <div class="glass-panel project-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                        <div class="project-img-wrapper" style="width: 100%; height: 240px; overflow: hidden;">
+                            <img src="./images/elite-estate.png" alt="Elite Estate" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                        </div>
+                        <div style="padding: 2.5rem; display: flex; flex-direction: column; flex-grow: 1;">
+                            <h3 style="color: var(--accent-purple); font-size: 1.8rem;">Elite Estate</h3>
+                            <p style="margin-top: 1rem; flex-grow: 1; font-size: 1.05rem; line-height: 1.6;">A luxurious real estate platform showcasing high-end properties with a sleek, minimalist UI and smooth cinematic scroll interactions.</p>
+                            <div class="tech-stack" style="margin-top: 1.5rem; margin-bottom: 2rem;">
+                                <span class="tag">Next.js</span>
+                                <span class="tag">TailwindCSS</span>
+                                <span class="tag">Framer Motion</span>
+                            </div>
+                            <a href="https://elite-estate-two.vercel.app/" target="_blank" class="btn-primary" style="margin-top: auto; justify-content: center; width: 100%;">Explore Project</a>
+                        </div>
+                    </div>
+
+                    <!-- Aetherflow -->
+                    <div class="glass-panel project-card" style="padding: 0; overflow: hidden; display: flex; flex-direction: column;">
+                        <div class="project-img-wrapper" style="width: 100%; height: 240px; overflow: hidden;">
+                            <img src="./images/aetherflow.png" alt="Aetherflow" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+                        </div>
+                        <div style="padding: 2.5rem; display: flex; flex-direction: column; flex-grow: 1;">
+                            <h3 style="color: var(--accent-blue); font-size: 1.8rem;">Aetherflow</h3>
+                            <p style="margin-top: 1rem; flex-grow: 1; font-size: 1.05rem; line-height: 1.6;">A beautiful, fluid web application featuring smooth abstract gradients, dark mode aesthetics, and futuristic glassmorphism elements.</p>
+                            <div class="tech-stack" style="margin-top: 1.5rem; margin-bottom: 2rem;">
+                                <span class="tag">UI/UX</span>
+                                <span class="tag">GSAP</span>
+                                <span class="tag">React</span>
+                            </div>
+                            <a href="https://shawalmazhar.github.io/aetherflow/" target="_blank" class="btn-primary" style="margin-top: auto; justify-content: center; width: 100%;">Explore Project</a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <section id="faq" class="faq-section" style="min-height: 80vh; display: flex; align-items: center;">
+            <div class="content" style="max-width: 800px;">
+                <h2 class="highlight">Common Questions</h2>
+                <div style="margin-top: 3rem; display: flex; flex-direction: column; gap: 1.5rem;">
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h4 style="color: var(--accent-blue);">Do you work on mobile apps?</h4>
+                        <p style="margin-top: 10px;">Yes! I specialize in cross-platform mobile development using React Native and Flutter, ensuring your app runs flawlessly on both iOS and Android.</p>
+                    </div>
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h4 style="color: var(--accent-purple);">How long does a 3D website take?</h4>
+                        <p style="margin-top: 10px;">Depending on complexity, a standard immersive landing page takes 2-4 weeks, while complex 3D configurators can take 6-10 weeks.</p>
+                    </div>
+                    <div class="glass-panel" style="padding: 2rem;">
+                        <h4 style="color: var(--accent-blue);">Are your sites SEO friendly?</h4>
+                        <p style="margin-top: 10px;">Absolutely. Even with heavy 3D elements, I prioritize semantic HTML and performance optimization to ensure search engines can index your site effectively.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="reviews" class="reviews" style="min-height: 100vh; display: flex; align-items: center;">
+            <div class="content">
+                <h2>Client Reviews</h2>
+                <div style="display: flex; gap: 2rem; flex-wrap: wrap;">
+                    <div class="glass-panel" style="padding: 2rem; flex: 1 1 0%; min-width: 280px;">
+                        <p style="font-style: italic; font-size: 1.1rem;">"Shawal completely transformed our web app. The 3D integration was flawless and the performance is incredible."</p>
+                        <h4 style="margin-top: 1rem; color: var(--accent-blue);">- Tech Innovators Inc. <br><span style="color: #ffbd2e; text-shadow: 0 0 10px rgba(255,189,46,0.6); font-size: 1.2rem; margin-top: 5px; display: inline-block;">⭐⭐⭐⭐⭐</span></h4>
+                    </div>
+                    <div class="glass-panel" style="padding: 2rem; flex: 1 1 0%; min-width: 280px;">
+                        <p style="font-style: italic; font-size: 1.1rem;">"A brilliant software engineer with an eye for stunning UI/UX design. Highly recommended for freelance projects."</p>
+                        <h4 style="margin-top: 1rem; color: var(--accent-purple);">- Creative Studio <br><span style="color: #ffbd2e; text-shadow: 0 0 10px rgba(255,189,46,0.6); font-size: 1.2rem; margin-top: 5px; display: inline-block;">⭐⭐⭐⭐⭐</span></h4>
+                    </div>
+                    <div class="glass-panel" style="padding: 2rem; flex: 1 1 0%; min-width: 280px;">
+                        <p style="font-style: italic; font-size: 1.1rem;">"The 3D portfolio he built for my agency blew our clients away. Outstanding attention to detail and delivery."</p>
+                        <h4 style="margin-top: 1rem; color: var(--accent-blue);">- Design Nexus <br><span style="color: #ffbd2e; text-shadow: 0 0 10px rgba(255,189,46,0.6); font-size: 1.2rem; margin-top: 5px; display: inline-block;">⭐⭐⭐⭐⭐</span></h4>
+                    </div>
+                    <div class="glass-panel" style="padding: 2rem; flex: 1 1 0%; min-width: 280px;">
+                        <p style="font-style: italic; font-size: 1.1rem;">"Professional, communicative, and exceptionally talented. Shawal brought our vision to life faster than expected."</p>
+                        <h4 style="margin-top: 1rem; color: var(--accent-purple);">- Global Startups <br><span style="color: #ffbd2e; text-shadow: 0 0 10px rgba(255,189,46,0.6); font-size: 1.2rem; margin-top: 5px; display: inline-block;">⭐⭐⭐⭐⭐</span></h4>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer style="padding: 5rem 10% 2rem; border-top: 1px solid rgba(255,255,255,0.05); margin-top: 5rem; background: transparent !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; position: relative; z-index: 10;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4rem; margin-bottom: 4rem;">
+            <div>
+                <a href="index.html?v=2" class="logo" style="display: block; margin-bottom: 1.5rem;">SM<span class="highlight">.</span></a>
+                <p style="font-size: 1rem; color: #888; line-height: 1.6;">Crafting high-performance digital experiences. Specializing in 3D Web architecture and premium mobile application development.</p>
+            </div>
+            <div>
+                <h4 style="color: var(--text-color); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">Quick Navigation</h4>
+                <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
+                    <li><a href="index.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">Home</a></li>
+                    <li><a href="services.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">Services</a></li>
+                    <li><a href="about.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">About</a></li>
+                    <li><a href="contact.html?v=2" class="footer-link" style="color: #888; text-decoration: none; transition: all 0.3s ease;">Contact</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 style="color: var(--text-color); margin-bottom: 1.5rem; text-transform: uppercase; letter-spacing: 2px;">Connect</h4>
+                <p style="color: #888; margin-bottom: 1.5rem;">Email: <a href="mailto:chshawal0069@gmail.com" style="color: var(--accent-blue); text-decoration: none; font-weight: 500;">chshawal0069@gmail.com</a></p>
+                <div style="display: flex; gap: 1rem;">
+                    <a href="https://pk.linkedin.com/in/shawal-mazhar-53a79430a" target="_blank" class="social-icon" style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.03); border: 1px solid rgba(157, 0, 255, 0.3); display: flex; align-items: center; justify-content: center; color: var(--accent-purple); transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                    </a>
+                    <a href="https://github.com/shawalmazhar" target="_blank" class="social-icon" style="width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.03); border: 1px solid rgba(0, 243, 255, 0.3); display: flex; align-items: center; justify-content: center; color: var(--accent-blue); transition: all 0.3s ease;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 2rem; text-align: center; color: #444; font-size: 0.85rem; letter-spacing: 1px;">
+            <p>© 2026 Shawal Mazhar. All rights reserved. | <span class="highlight">Architecting Digital Realities</span></p>
+        </div>
+    </footer>
+
+    <script>
+        const heroSection = document.getElementById('hero-scroll-section');
+        const scrollHint = document.querySelector('.scroll-hint');
+        const header = document.querySelector('header');
+
+        let cachedSectionTop = 0;
+        let cachedSectionHeight = 0;
+
+        function updateHeroHeightAndMetrics() {
+            if (heroSection) {
+                const heroScrollDuration = window.innerHeight * 8; // Extended to 8 viewports for a longer, slower scroll
+                heroSection.style.height = `${heroScrollDuration}px`;
+                
+                // Cache metrics to prevent layout thrashing on scroll
+                cachedSectionTop = heroSection.getBoundingClientRect().top + window.scrollY;
+                cachedSectionHeight = heroSection.offsetHeight - window.innerHeight;
+            }
+        }
+        
+        window.addEventListener('load', updateHeroHeightAndMetrics);
+        window.addEventListener('resize', updateHeroHeightAndMetrics);
+
+        window.targetFrame = 1;
+        window.currentFrame = 1;
+        const totalFrames = 192;
+
+        function onHeroScroll() {
+            const scrolled      = Math.max(0, window.scrollY - cachedSectionTop);
+            const progress      = cachedSectionHeight > 0 ? Math.min(1, scrolled / cachedSectionHeight) : 0;
+
+            window.targetFrame = 1 + progress * (totalFrames - 1);
+
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+
+            const heroContent = document.getElementById('hero-content');
+            const text1 = document.getElementById('text-block-1');
+            const text2 = document.getElementById('text-block-2');
+            const text3 = document.getElementById('text-block-3');
+
+            if (progress < 0.15) {
+                heroContent.classList.remove('hidden');
+                text1.classList.remove('visible');
+                text2.classList.remove('visible');
+                text3.classList.remove('visible');
+            } else if (progress >= 0.2 && progress < 0.4) {
+                heroContent.classList.add('hidden');
+                text1.classList.add('visible');
+                text2.classList.remove('visible');
+                text3.classList.remove('visible');
+            } else if (progress >= 0.4 && progress < 0.6) {
+                heroContent.classList.add('hidden');
+                text1.classList.remove('visible');
+                text2.classList.add('visible');
+                text3.classList.remove('visible');
+            } else if (progress >= 0.65 && progress < 0.85) {
+                heroContent.classList.add('hidden');
+                text1.classList.remove('visible');
+                text2.classList.remove('visible');
+                text3.classList.add('visible');
+            } else {
+                heroContent.classList.add('hidden');
+                text1.classList.remove('visible');
+                text2.classList.remove('visible');
+                text3.classList.remove('visible');
+            }
+
+            if (scrolled > 100) {
+                scrollHint.classList.add('hidden');
+            } else {
+                scrollHint.classList.remove('hidden');
+            }
+        }
+
+        window.addEventListener('scroll', onHeroScroll, { passive: true });
+        onHeroScroll(); 
+
+        const hamburger = document.getElementById('hamburger');
+        const nav = document.getElementById('navbar');
+        const navLinks = document.querySelectorAll('nav a');
+
+        hamburger.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            hamburger.classList.toggle('toggle');
+        });
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                nav.classList.remove('active');
+                hamburger.classList.remove('toggle');
+            });
+        });
+
+        // Robust Scroll to Reviews Section Handler
+        function scrollToReviews(smooth = true) {
+            const target = document.getElementById('reviews');
+            if (target) {
+                // Determine scrolling position exactly
+                const rect = target.getBoundingClientRect();
+                const absoluteTop = rect.top + window.scrollY;
+                // Scroll to target with offset for fixed header
+                window.scrollTo({
+                    top: absoluteTop - 80,
+                    behavior: smooth ? 'smooth' : 'auto'
+                });
+            }
+        }
+
+        // Intercept all reviews link clicks for pixel-perfect scrolling
+        document.querySelectorAll('a[href*="#reviews"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                scrollToReviews(true);
+                history.pushState(null, null, '#reviews');
+            });
+        });
+
+        // Trigger on load if landing on #reviews with stable layout delay
+        window.addEventListener('load', () => {
+            if (window.location.hash.includes('#reviews')) {
+                setTimeout(() => {
+                    scrollToReviews(true);
+                }, 600);
+            }
+        });
+
+        // Trigger on hashchange
+        window.addEventListener('hashchange', () => {
+            if (window.location.hash.includes('#reviews')) {
+                scrollToReviews(true);
+            }
+        });
+    </script>
+
+
+    <script type="module">
+        const isMobile = window.innerWidth <= 992 || ('ontouchstart' in window);
+
+        const video = document.getElementById('video-bg');
+        
+        const lerpFactor = isMobile ? 1.0 : 0.12;
+
+        // ===== PRELOADER =====
+        const preloader = document.getElementById('preloader');
+        const loadProgress = document.getElementById('load-progress');
+        const loadPercent = document.getElementById('load-percent');
+
+        let preloaderDone = false;
+        function dismissPreloader() {
+            if (preloaderDone) return;
+            preloaderDone = true;
+            if (preloader) preloader.classList.add('fade-out');
+        }
+
+        video.addEventListener('loadeddata', () => {
+            if (loadProgress) loadProgress.style.width = `100%`;
+            if (loadPercent) loadPercent.innerText = `100%`;
+            dismissPreloader();
+        });
+        
+        // Fallback in case video takes too long
+        setTimeout(dismissPreloader, 3000);
+
+        // ===== SCRUB LOOP =====
+        function updateVideoScrub() {
+            if (video.duration) {
+                // Calculate progress from window.targetFrame (from onHeroScroll)
+                const totalFrames = 192; // from onHeroScroll
+                const progress = (window.targetFrame - 1) / (totalFrames - 1);
+                
+                const targetTime = progress * video.duration;
+                const diff = targetTime - video.currentTime;
+                
+                if (Math.abs(diff) > 0.01) {
+                    video.currentTime += diff * lerpFactor;
+                }
+            }
+            requestAnimationFrame(updateVideoScrub);
+        }
+
+        window.addEventListener('load', () => {
+            requestAnimationFrame(updateVideoScrub);
+            // Force load
+            video.load();
+        });
+
+        // Desktop-only mouse tilt
+        if (!isMobile) {
+            const tiltEls = document.querySelectorAll('.glass-panel, .content');
+            window.addEventListener('mousemove', e => {
+                const xV = (e.clientX/window.innerWidth-0.5)*15, yV = -(e.clientY/window.innerHeight-0.5)*15;
+                tiltEls.forEach(el => { 
+                    el.style.transform=`perspective(1000px) rotateY(${xV}deg) rotateX(${yV}deg)`; 
+                    el.style.transition='transform 0.25s cubic-bezier(0.25, 1, 0.5, 1)';
+                });
+            });
+        }
+    </script>
+
+</body>
+    </html>
