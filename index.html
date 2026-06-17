@@ -986,54 +986,34 @@
         
         const lerpFactor = isMobile ? 1.0 : 0.12;
 
-        // ===== PRELOADER & VIDEO INIT =====
+        // ===== PRELOADER & FULL VIDEO BLOB FETCH =====
         const preloader = document.getElementById('preloader');
         const loadProgress = document.getElementById('load-progress');
         const loadPercent = document.getElementById('load-percent');
 
         let preloaderDone = false;
-        let progressVal = 0;
-        
-        // Fast simulated progress to make loading feel extremely snappy
-        const progressInterval = setInterval(() => {
-            if (preloaderDone) {
-                clearInterval(progressInterval);
-                return;
-            }
-            progressVal += Math.random() * 30 + 10;
-            if (progressVal > 90) progressVal = 90;
-            if (loadProgress) loadProgress.style.width = `${progressVal}%`;
-            if (loadPercent) loadPercent.innerText = `${Math.floor(progressVal)}%`;
-        }, 50);
 
         function dismissPreloader() {
             if (preloaderDone) return;
             preloaderDone = true;
-            clearInterval(progressInterval);
             
             if (loadProgress) loadProgress.style.width = `100%`;
             if (loadPercent) loadPercent.innerText = `100%`;
             
             setTimeout(() => {
                 if (preloader) preloader.classList.add('fade-out');
-            }, 200);
+            }, 300);
         }
 
-        // Initialize Video for Scrubbing (fixes Mobile Black Screen & Initial Stuck Issues)
-        function initVideo() {
-            if (preloaderDone) return; // Prevent multiple triggers
-            
-            // Force browser to fetch and render the first frame
+        // Initialize Video for Scrubbing (fixes Mobile Black Screen)
+        function initVideoAndDismiss() {
             video.currentTime = 0.001; 
-            
-            // Calling play() and pause() unlocks the video buffer on mobile Safari/Chrome
             const playPromise = video.play();
             if (playPromise !== undefined) {
                 playPromise.then(() => {
                     video.pause();
-                    dismissPreloader(); // Video is unlocked and ready
+                    dismissPreloader();
                 }).catch((error) => {
-                    // Autoplay prevented or other error, fallback to just dismissing
                     video.pause();
                     dismissPreloader();
                 });
@@ -1042,18 +1022,42 @@
             }
         }
 
-        // Check if we have enough data to init immediately
-        if (video.readyState >= 3) {
-            initVideo();
-        } else {
-            // Otherwise wait for the first frame to load
-            video.addEventListener('loadeddata', initVideo);
-            video.addEventListener('canplay', initVideo);
-            video.load(); // Explicitly force load for mobile Safari
-        }
+        // Fetch the ENTIRE video into RAM before proceeding
+        const req = new XMLHttpRequest();
+        req.open('GET', './images/Cinematic_3D_transition_GOP1.mp4', true);
+        req.responseType = 'blob';
+
+        req.onload = function() {
+            if (this.status === 200) {
+                const videoBlob = this.response;
+                const videoUrl = URL.createObjectURL(videoBlob);
+                video.src = videoUrl;
+                video.load();
+                
+                // Video is 100% in RAM now. Init and dismiss.
+                initVideoAndDismiss();
+            } else {
+                dismissPreloader(); // Fallback on error
+            }
+        };
+
+        req.onprogress = function(e) {
+            if (e.lengthComputable && !preloaderDone) {
+                const percentComplete = (e.loaded / e.total) * 100;
+                // Since user wants it to feel fast, we show exactly the true download %
+                if (loadProgress) loadProgress.style.width = `${percentComplete}%`;
+                if (loadPercent) loadPercent.innerText = `${Math.floor(percentComplete)}%`;
+            }
+        };
+
+        req.onerror = function() {
+            dismissPreloader(); // Fallback on network error
+        };
+
+        req.send();
         
-        // Give it up to 5 seconds to load the first frame before forcing dismiss
-        setTimeout(dismissPreloader, 5000);
+        // Safety fallback just in case network hangs forever (e.g. 20 seconds)
+        setTimeout(dismissPreloader, 20000);
 
         // ===== SCRUB LOOP =====
         function updateVideoScrub() {
