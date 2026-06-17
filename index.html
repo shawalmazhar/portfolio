@@ -1049,10 +1049,11 @@
             // Otherwise wait for the first frame to load
             video.addEventListener('loadeddata', initVideo);
             video.addEventListener('canplay', initVideo);
+            video.load(); // Explicitly force load for mobile Safari
         }
         
-        // Very fast fallback so the user is never stuck on the loading screen
-        setTimeout(dismissPreloader, 1500);
+        // Give it up to 5 seconds to load the first frame before forcing dismiss
+        setTimeout(dismissPreloader, 5000);
 
         // ===== SCRUB LOOP =====
         function updateVideoScrub() {
