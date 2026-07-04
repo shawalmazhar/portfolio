@@ -7,8 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
-    <link rel="preload" href="./images/Cinematic_3D_transition_GOP1.mp4" as="video" type="video/mp4">
-    
+
     <style>
 
         html { overflow-y: scroll; scroll-behavior: smooth; background-color: var(--bg-color); } :root {
@@ -31,6 +30,10 @@
             background-color: transparent;
             color: var(--text-color);
             overflow-x: clip; /* Fix for sticky position */
+            overflow-y: hidden; /* Lock scroll by default */
+        }
+        body.loaded {
+            overflow-y: auto;
         }
 
         #video-bg, #video-bg-canvas {
@@ -251,7 +254,14 @@
             background: transparent;
             border: none;
             backdrop-filter: none;
-            transition: padding 0.4s ease;
+            transition: padding 0.4s ease, opacity 0.8s ease, transform 0.8s ease;
+            opacity: 0;
+            transform: translateY(-20px);
+        }
+
+        body.loaded header {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         header.scrolled {
@@ -288,6 +298,13 @@
             position: relative;
             z-index: 1;
             width: 100%;
+            opacity: 0;
+            transform: scale(0.98) translateY(15px);
+            transition: opacity 1s cubic-bezier(0.25, 1, 0.5, 1), transform 1s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+        body.loaded main {
+            opacity: 1;
+            transform: none;
         }
 
         section {
@@ -485,23 +502,63 @@
             width: 100vw;
             height: 100vh;
             height: 100dvh;
-            background: #030303;
             z-index: 999999;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: opacity 0.8s cubic-bezier(0.77, 0, 0.175, 1), visibility 0.8s;
+            visibility: visible;
+            overflow: hidden;
         }
-        #preloader.fade-out {
-            opacity: 0;
-            visibility: hidden;
+        
+        .preloader-panel {
+            position: absolute;
+            top: 0;
+            width: 50.5%; /* Faint overlap to prevent gaps */
+            height: 100%;
+            background: #030303;
+            transition: transform 0.8s cubic-bezier(0.77, 0, 0.175, 1);
+            z-index: 1;
         }
+        .left-panel {
+            left: 0;
+            transform: translateX(0);
+            border-right: 1px solid rgba(0, 243, 255, 0.15);
+        }
+        .right-panel {
+            right: 0;
+            transform: translateX(0);
+            border-left: 1px solid rgba(157, 0, 255, 0.15);
+        }
+        
+        #preloader.fade-out .left-panel {
+            transform: translateX(-100%);
+        }
+        #preloader.fade-out .right-panel {
+            transform: translateX(100%);
+        }
+        
         .preloader-content {
+            position: relative;
+            z-index: 2;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 20px;
+            transition: opacity 0.4s ease, transform 0.4s ease;
         }
+        
+        #preloader.fade-out .preloader-content {
+            opacity: 0;
+            transform: scale(0.92);
+            pointer-events: none;
+        }
+        
+        #preloader.fade-out {
+            visibility: hidden;
+            transition: visibility 0.8s;
+            transition-delay: 0.8s;
+        }
+        
         .cyber-ring {
             width: 80px; height: 80px;
             border: 2px solid rgba(0, 243, 255, 0.1);
@@ -535,7 +592,7 @@
             height: 100%;
             background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
             box-shadow: 0 0 10px var(--accent-blue);
-            transition: width 0.1s ease-out;
+            transition: width 0.15s cubic-bezier(0.23, 1, 0.32, 1);
         }
         .loading-percentage {
             font-family: 'Fira Code', monospace;
@@ -566,10 +623,12 @@
 <body>
     <!-- Futuristic Preloader -->
     <div id="preloader">
+        <div class="preloader-panel left-panel"></div>
+        <div class="preloader-panel right-panel"></div>
         <div class="preloader-content">
             <div class="cyber-ring"></div>
-            <div class="loading-text">
-                <span class="highlight">ARCHITECTING</span> REALITY
+            <div class="loading-text" id="preloader-text">
+                <span class="highlight">INITIALIZING</span> SYSTEM
             </div>
             <div class="loading-bar">
                 <div class="loading-progress" id="load-progress"></div>
@@ -584,12 +643,11 @@
             if (preloader) {
                 preloader.style.setProperty('display', 'none', 'important');
             }
+            document.body.classList.add('loaded');
         }
     </script>
     
-    <video id="video-bg" preload="auto" muted playsinline>
-        <source src="./images/Cinematic_3D_transition_GOP1.mp4" type="video/mp4">
-    </video>
+    <video id="video-bg" preload="auto" muted playsinline src="./images/Cinematic_3D_transition_GOP1.mp4"></video>
     <div class="video-overlay"></div>
 
     <header>
@@ -884,22 +942,22 @@
             const text2 = document.getElementById('text-block-2');
             const text3 = document.getElementById('text-block-3');
 
-            if (progress < 0.15) {
+            if (progress < 0.12) {
                 heroContent.classList.remove('hidden');
                 text1.classList.remove('visible');
                 text2.classList.remove('visible');
                 text3.classList.remove('visible');
-            } else if (progress >= 0.2 && progress < 0.4) {
+            } else if (progress >= 0.12 && progress < 0.35) {
                 heroContent.classList.add('hidden');
                 text1.classList.add('visible');
                 text2.classList.remove('visible');
                 text3.classList.remove('visible');
-            } else if (progress >= 0.4 && progress < 0.6) {
+            } else if (progress >= 0.35 && progress < 0.55) {
                 heroContent.classList.add('hidden');
                 text1.classList.remove('visible');
                 text2.classList.add('visible');
                 text3.classList.remove('visible');
-            } else if (progress >= 0.65 && progress < 0.85) {
+            } else if (progress >= 0.55 && progress < 0.8) {
                 heroContent.classList.add('hidden');
                 text1.classList.remove('visible');
                 text2.classList.remove('visible');
@@ -983,10 +1041,8 @@
         const isMobile = window.innerWidth <= 992 || ('ontouchstart' in window);
 
         const video = document.getElementById('video-bg');
-        
-        const lerpFactor = isMobile ? 1.0 : 0.12;
 
-        // ===== PRELOADER & FULL VIDEO BLOB FETCH =====
+        // ===== PRELOADER & NATIVE VIDEO LOADING =====
         const preloader = document.getElementById('preloader');
         const loadProgress = document.getElementById('load-progress');
         const loadPercent = document.getElementById('load-percent');
@@ -1002,6 +1058,8 @@
             
             setTimeout(() => {
                 if (preloader) preloader.classList.add('fade-out');
+                // CRITICAL: Unlock scrolling by adding body.loaded
+                document.body.classList.add('loaded');
             }, 300);
         }
 
@@ -1013,7 +1071,7 @@
                 playPromise.then(() => {
                     video.pause();
                     dismissPreloader();
-                }).catch((error) => {
+                }).catch(() => {
                     video.pause();
                     dismissPreloader();
                 });
@@ -1022,65 +1080,58 @@
             }
         }
 
-        // Fetch the ENTIRE video into RAM before proceeding
-        const req = new XMLHttpRequest();
-        req.open('GET', './images/Cinematic_3D_transition_GOP1.mp4', true);
-        req.responseType = 'blob';
-
-        req.onload = function() {
-            if (this.status === 200) {
-                const videoBlob = this.response;
-                const videoUrl = URL.createObjectURL(videoBlob);
-                video.src = videoUrl;
-                video.load();
-                
-                // Video is 100% in RAM now. Init and dismiss.
-                initVideoAndDismiss();
-            } else {
-                dismissPreloader(); // Fallback on error
-            }
-        };
-
-        req.onprogress = function(e) {
-            if (e.lengthComputable && !preloaderDone) {
-                const percentComplete = (e.loaded / e.total) * 100;
-                // Since user wants it to feel fast, we show exactly the true download %
+        // Use native browser video loading — src is already set in HTML
+        // Show progress via the buffered ranges
+        let progressInterval = setInterval(() => {
+            if (preloaderDone) { clearInterval(progressInterval); return; }
+            if (video.buffered.length > 0 && video.duration) {
+                const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                const percentComplete = (bufferedEnd / video.duration) * 100;
                 if (loadProgress) loadProgress.style.width = `${percentComplete}%`;
                 if (loadPercent) loadPercent.innerText = `${Math.floor(percentComplete)}%`;
             }
-        };
+        }, 100);
 
-        req.onerror = function() {
-            dismissPreloader(); // Fallback on network error
-        };
+        // Dismiss preloader as soon as video can play through
+        video.addEventListener('canplaythrough', () => {
+            clearInterval(progressInterval);
+            initVideoAndDismiss();
+        }, { once: true });
 
-        req.send();
-        
-        // Safety fallback just in case network hangs forever (e.g. 20 seconds)
-        setTimeout(dismissPreloader, 20000);
+        // Fast fallback: if enough data loaded but canplaythrough is slow
+        video.addEventListener('loadeddata', () => {
+            setTimeout(() => {
+                if (!preloaderDone) initVideoAndDismiss();
+            }, 800);
+        }, { once: true });
+
+        // Safety fallback in case network hangs (8 seconds max wait)
+        setTimeout(() => {
+            if (!preloaderDone) initVideoAndDismiss();
+        }, 8000);
 
         // ===== SCRUB LOOP =====
         function updateVideoScrub() {
+            // Skip scrubbing when scrolled well past hero section
+            if (window.scrollY > cachedSectionTop + cachedSectionHeight + window.innerHeight) {
+                requestAnimationFrame(updateVideoScrub);
+                return;
+            }
             if (video.duration) {
-                // Calculate progress from window.targetFrame (from onHeroScroll)
-                const totalFrames = 192; // from onHeroScroll
+                const totalFrames = 192;
                 const progress = (window.targetFrame - 1) / (totalFrames - 1);
-                
                 const targetTime = progress * video.duration;
-                const diff = targetTime - video.currentTime;
                 
-                if (Math.abs(diff) > 0.01) {
-                    video.currentTime += diff * lerpFactor;
+                // Direct seek — GOP=1 means every frame is a keyframe, no lerp needed
+                if (Math.abs(targetTime - video.currentTime) > 0.01) {
+                    video.currentTime = targetTime;
                 }
             }
             requestAnimationFrame(updateVideoScrub);
         }
 
-        window.addEventListener('load', () => {
-            requestAnimationFrame(updateVideoScrub);
-            // Force load
-            video.load();
-        });
+        // Start scrub loop immediately
+        requestAnimationFrame(updateVideoScrub);
 
         // Desktop-only mouse tilt
         if (!isMobile) {
